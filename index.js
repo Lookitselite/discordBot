@@ -6,7 +6,8 @@ import schedule from 'node-schedule';
 
 const rule = new schedule.RecurrenceRule();
 rule.hour = [6, 18];
-rule.minute = [7];
+rule.minute = 7;
+rule.second = 5;
 
 client.login(process.env.DISCORD_TOKEN);
 
