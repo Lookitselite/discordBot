@@ -5,9 +5,10 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 import schedule from 'node-schedule';
 
 const rule = new schedule.RecurrenceRule();
-rule.hour = [6, 18];
-rule.minute = 7;
-rule.second = 5;
+rule.hour = [6, 18, 13];
+rule.minute = [7, 9];
+rule.second = 30;
+rule.tz = 'America/New_York';
 
 client.login(process.env.DISCORD_TOKEN);
 
