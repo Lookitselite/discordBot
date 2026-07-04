@@ -1,11 +1,12 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 import 'dotenv/config';
-import users from './users.json' with { type: 'json' };
+import fs from 'fs';
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 let wokeMode = false;
 let pingedUsers = [];
+const users = JSON.parse(fs.readFileSync('./users.json', 'utf8'));
 const allUserIds = Object.keys(users);
 
 function randomIntGen(min, max) {
