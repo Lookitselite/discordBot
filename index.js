@@ -1,47 +1,66 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 import 'dotenv/config';
+import users from './users.json' with { type: 'json' };
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
-import schedule from 'node-schedule';
 
-const rule = new schedule.RecurrenceRule();
-rule.hour = [6, 18, 13];
-rule.minute = [7, 9];
-rule.second = 30;
-rule.tz = 'America/New_York';
+let wokeMode = false;
+let pingedUsers = [];
+const allUserIds = Object.keys(users);
 
-client.login(process.env.DISCORD_TOKEN);
+function randomIntGen(min, max) {
+    const minCeiled = Math.ceil(min);
+    const maxFloored = Math.floor(max);
+    return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled); 
+}
 
 client.once('clientReady', async () => {
     try {
         const channel = await client.channels.fetch(process.env.CHANNEL_ID);
         await channel.send('I have woken');
+        
+        runPingCycle(); 
     }
     catch (error) {
         console.error('Could not find or send message to the channel:', error);
     }
 });
 
-const job = schedule.scheduleJob(rule, async () => {
+async function runPingCycle() {
     try {
+        let currentWaitMinutes = 1; 
+
+        if (!wokeMode) {
+            currentWaitMinutes = randomIntGen(1, 90);
+        }
+
+        let date = new Date();
+        let time = date.toLocaleTimeString(); 
+
+        let availableUsers = allUserIds.filter(id => !pingedUsers.includes(id));
+
+        if (availableUsers.length === 0) {
+            pingedUsers = []; 
+            availableUsers = [...allUserIds];
+        }
+
+        const randomIndex = Math.floor(Math.random() * availableUsers.length);
+        const chosenUserId = availableUsers[randomIndex];
+        pingedUsers.push(chosenUserId);
+
         const channel = await client.channels.fetch(process.env.CHANNEL_ID);
-        const uID = process.env.TARG_ID;
-        await channel.send(`<@${uID}>! IT'S 6:07! 676767!!!!!`);
-    }
-    catch (error) {
-        console.error('Could not find or send message to the channel:', error);
-    }
-});
+        
+        await channel.send(`<@${chosenUserId}>, did you know it's ${time}?`);
+        
+        const identity = users[chosenUserId];
+        console.log(`Pinged ${identity}. Next ping in ${currentWaitMinutes} minutes.`);
 
-client.on('interactionCreate', async interaction => {
-    if (!interaction.isChatInputCommand()) return;
+        setTimeout(runPingCycle, currentWaitMinutes * 60 * 1000);
 
-    if (interaction.commandName === 'ping') {
-        log(interaction.commandName);
-        await interaction.reply('Pong!');
+    } catch (error) {
+        console.error("Error in ping cycle:", error);
+        setTimeout(runPingCycle, 60 * 1000); 
     }
-});
-
-function log(cmd) { 
-    console.log(cmd + " recived")
 }
+
+client.login(process.env.DISCORD_TOKEN);
