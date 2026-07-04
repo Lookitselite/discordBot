@@ -17,7 +17,7 @@ function randomIntGen(min, max) {
 client.once('clientReady', async () => {
     try {
         const channel = await client.channels.fetch(process.env.CHANNEL_ID);
-        await channel.send('I have woken');
+        await channel.send("I'm straight up clocking on it");
         
         runPingCycle(); 
     }
