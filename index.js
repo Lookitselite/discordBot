@@ -32,8 +32,10 @@ async function runPingCycle() {
         let currentWaitMinutes = 1; 
 
         if (!wokeMode) {
-            currentWaitMinutes = randomIntGen(1, 90);
-        }
+            currentWaitMinutes = randomIntGen(1, 900);
+        } else {
+	    wokeMode = true;
+	}
 
         let date = new Date();
         let time = date.toLocaleTimeString(); 
